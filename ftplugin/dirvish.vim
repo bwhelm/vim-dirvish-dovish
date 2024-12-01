@@ -24,7 +24,11 @@ end
 
 if !exists('g:DovishDelete')
   function! g:DovishDelete(target) abort
-    return 'mv ' . shellescape(a:target) . ' ~/.Trash/'
+      if exists('g:device') && g:device =~ "mac"
+          return 'mv ' . shellescape(a:target) . ' ~/.Trash/'
+      else
+          return 'rm ' . shellescape(a:target)
+      endif
   endfunction
 end
 

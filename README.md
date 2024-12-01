@@ -1,4 +1,4 @@
-# 🧰 vim-dirvish-dovish
+# vim-dirvish-dovish
 
 > The file manipulation commands for [vim-dirvish][dirvish] that you've always wanted
 
@@ -9,7 +9,6 @@ Have only tested on MacOS and Neovim, but it should work with Vim.
 You'll need:
 
 - [dirvish.vim][dirvish]
-- A CLI that provides a `trash` command, such as [trash](https://formulae.brew.sh/formula/trash) or [trash-cli](https://github.com/sindresorhus/trash-cli)
 
 Then install with your favorite package manager:
 
@@ -21,10 +20,10 @@ Plug 'roginfarrer/vim-dirvish-dovish', {'branch': 'main'}
 
 | Function                                | Default | Key                               |
 | --------------------------------------- | ------- | --------------------------------- |
-| Create file                             | `a`     | `<Plug>(dovish_create_file)`      |
-| Create directory                        | `A`     | `<Plug>(dovish_create_directory)` |
+<!--| Create file                             | `a`     | `<Plug>(dovish_create_file)`      |-->
+<!--| Create directory                        | `A`     | `<Plug>(dovish_create_directory)` |-->
 | Delete under cursor                     | `dd`    | `<Plug>(dovish_delete)`           |
-| Rename under cursor                     | `r`     | `<Plug>(dovish_rename)`           |
+| Rename under cursor                     | `cw`    | `<Plug>(dovish_rename)`           |
 | Yank under cursor (or visual selection) | `yy`    | `<Plug>(dovish_yank)`             |
 | Copy file to current directory          | `pp`    | `<Plug>(dovish_copy)`             |
 | Move file to current directory          | `PP`    | `<Plug>(dovish_move)`             |
@@ -39,10 +38,10 @@ let g:dirvish_dovish_map_keys = 0
 unmap <buffer> p
 
 " Your preferred mappings
-nmap <silent><buffer> i <Plug>(dovish_create_file)
-nmap <silent><buffer> I <Plug>(dovish_create_directory)
+<!--nmap <silent><buffer> a <Plug>(dovish_create_file)-->
+<!--nmap <silent><buffer> A <Plug>(dovish_create_directory)-->
 nmap <silent><buffer> dd <Plug>(dovish_delete)
-nmap <silent><buffer> r <Plug>(dovish_rename)
+nmap <silent><buffer> cw <Plug>(dovish_rename)
 nmap <silent><buffer> yy <Plug>(dovish_yank)
 xmap <silent><buffer> yy <Plug>(dovish_yank)
 nmap <silent><buffer> p <Plug>(dovish_copy)
@@ -71,7 +70,7 @@ endfunction
 
 " Used for <Plug>(dovish_delete)
 function! g:DovishDelete(target) abort
-  return 'trash ' . a:target
+  return 'mv ' . a:target . ' ~/.Trash/'
 endfunction
 
 " Used for <Plug>(dovish_rename)

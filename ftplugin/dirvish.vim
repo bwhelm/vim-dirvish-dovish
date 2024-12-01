@@ -24,7 +24,7 @@ end
 
 if !exists('g:DovishDelete')
   function! g:DovishDelete(target) abort
-    return 'trash ' . shellescape(a:target)
+    return 'mv ' . shellescape(a:target) . ' ~/.Trash/'
   endfunction
 end
 
@@ -60,46 +60,46 @@ function! s:getVisualSelection()
   return lines
 endfunction
 
-function! s:createFile() abort
-  " Prompt for new filename
-  let filename = input('File name: ')
-  if trim(filename) == ''
-    return
-  endif
-  " Append filename to the path of the current buffer
-  let filepath = expand("%") . filename
-
-  let output = system("touch " . shellescape(filepath))
-  if v:shell_error
-    call s:logError(cmd)
-  endif
-
-  " Reload the buffer
-  Dirvish %
-  call s:moveCursorTo(filename)
-endf
-
-function! s:createDirectory() abort
-  let dirname = input('Directory name: ')
-  if trim(dirname) == ''
-    return
-  endif
-  let dirpath = expand("%") . dirname
-  if isdirectory(dirpath)
-    redraw
-    echomsg printf('"%s" already exists.', dirpath)
-    return
-  endif
-
-  let output = system("mkdir " . shellescape(dirpath))
-  if v:shell_error
-    call s:logError(output)
-  endif
-
-  " Reload the buffer
-  Dirvish %
-  call s:moveCursorTo(dirname . '/')
-endf
+" function! s:createFile() abort
+"   " Prompt for new filename
+"   let filename = input('File name: ')
+"   if trim(filename) == ''
+"     return
+"   endif
+"   " Append filename to the path of the current buffer
+"   let filepath = expand("%") . filename
+"
+"   let output = system("touch " . shellescape(filepath))
+"   if v:shell_error
+"     call s:logError(cmd)
+"   endif
+"
+"   " Reload the buffer
+"   Dirvish %
+"   call s:moveCursorTo(filename)
+" endf
+"
+" function! s:createDirectory() abort
+"   let dirname = input('Directory name: ')
+"   if trim(dirname) == ''
+"     return
+"   endif
+"   let dirpath = expand("%") . dirname
+"   if isdirectory(dirpath)
+"     redraw
+"     echomsg printf('"%s" already exists.', dirpath)
+"     return
+"   endif
+"
+"   let output = system("mkdir " . shellescape(dirpath))
+"   if v:shell_error
+"     call s:logError(output)
+"   endif
+"
+"   " Reload the buffer
+"   Dirvish %
+"   call s:moveCursorTo(dirname . '/')
+" endf
 
 function! s:deleteItemUnderCursor() abort
   " Grab the line under the cursor. Each line is a filepath
@@ -199,6 +199,7 @@ function! s:moveYankedItemToCurrentDirectory() abort
 
   " Reload the buffer
   Dirvish %
+  call s:moveCursorTo(filename)
 endfunction
 
 function! s:copyYankedItemToCurrentDirectory() abort
@@ -244,6 +245,7 @@ function! s:copyYankedItemToCurrentDirectory() abort
 
   " Reload the buffer
   Dirvish %
+  call s:moveCursorTo(filename)
 endfunction
 
 function! s:copyFilePathUnderCursor() abort
@@ -274,8 +276,8 @@ function! s:logError(error) abort
   echohl WarningMsg | echomsg a:error | echohl None
 endfunction
 
-nnoremap <silent><buffer> <Plug>(dovish_create_file) :<C-U> call <SID>createFile()<CR>
-nnoremap <silent><buffer> <Plug>(dovish_create_directory) :<C-U> call <SID>createDirectory()<CR>
+" nnoremap <silent><buffer> <Plug>(dovish_create_file) :<C-U> call <SID>createFile()<CR>
+" nnoremap <silent><buffer> <Plug>(dovish_create_directory) :<C-U> call <SID>createDirectory()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_rename) :<C-U> call <SID>renameItemUnderCursor()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_delete) :<C-U> call <SID>deleteItemUnderCursor()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_yank) :<C-U> call <SID>copyFilePathUnderCursor()<CR>
@@ -288,17 +290,17 @@ if !exists("g:dirvish_dovish_map_keys")
 endif
 
 if g:dirvish_dovish_map_keys
-  if !hasmapto('<Plug>(dovish_create_file)', 'n')
-    execute 'nmap <silent><buffer> a <Plug>(dovish_create_file)'
-  endif
-  if !hasmapto('<Plug>(dovish_create_directory)', 'n')
-    execute 'nmap <silent><buffer> A <Plug>(dovish_create_directory)'
-  endif
+  " if !hasmapto('<Plug>(dovish_create_file)', 'n')
+  "   execute 'nmap <silent><buffer> a <Plug>(dovish_create_file)'
+  " endif
+  " if !hasmapto('<Plug>(dovish_create_directory)', 'n')
+  "   execute 'nmap <silent><buffer> A <Plug>(dovish_create_directory)'
+  " endif
   if !hasmapto('<Plug>(dovish_delete)', 'n')
     execute 'nmap <silent><buffer> dd <Plug>(dovish_delete)'
   endif
   if !hasmapto('<Plug>(dovish_rename)', 'n')
-    execute 'nmap <silent><buffer> r <Plug>(dovish_rename)'
+    execute 'nmap <silent><buffer> cw <Plug>(dovish_rename)'
   endif
   if !hasmapto('<Plug>(dovish_yank)', 'n')
     execute 'nmap <silent><buffer> yy <Plug>(dovish_yank)'

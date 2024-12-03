@@ -22,7 +22,7 @@ Plug 'roginfarrer/vim-dirvish-dovish', {'branch': 'main'}
 | --------------------------------------- | ------- | --------------------------------- |
 <!--| Create file                             | `a`     | `<Plug>(dovish_create_file)`      |-->
 <!--| Create directory                        | `A`     | `<Plug>(dovish_create_directory)` |-->
-| Delete under cursor                     | `dd`    | `<Plug>(dovish_delete)`           |
+| Delete under cursor/selection           | `dd`    | `<Plug>(dovish_delete)`           |
 | Rename under cursor                     | `cw`    | `<Plug>(dovish_rename)`           |
 | Yank under cursor (or visual selection) | `yy`    | `<Plug>(dovish_yank)`             |
 | Copy file to current directory          | `pp`    | `<Plug>(dovish_copy)`             |
@@ -41,6 +41,7 @@ unmap <buffer> p
 <!--nmap <silent><buffer> a <Plug>(dovish_create_file)-->
 <!--nmap <silent><buffer> A <Plug>(dovish_create_directory)-->
 nmap <silent><buffer> dd <Plug>(dovish_delete)
+xmap <silent><buffer> dd <Plug>(dovish_delete_selection)
 nmap <silent><buffer> cw <Plug>(dovish_rename)
 nmap <silent><buffer> yy <Plug>(dovish_yank)
 xmap <silent><buffer> yy <Plug>(dovish_yank)
@@ -70,7 +71,15 @@ endfunction
 
 " Used for <Plug>(dovish_delete)
 function! g:DovishDelete(target) abort
-  return 'mv ' . a:target . ' ~/.Trash/'
+  if !exists('g:DovishDelete')
+    function! g:DovishDelete(target) abort
+      if exists('g:device') && g:device =~ "mac"
+        return 'mv ' . shellescape(a:target) . ' ~/.Trash/'
+      else
+        return 'rm ' . shellescape(a:target)
+      endif
+    endfunction
+  end
 endfunction
 
 " Used for <Plug>(dovish_rename)

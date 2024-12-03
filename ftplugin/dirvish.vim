@@ -42,25 +42,21 @@ function! s:moveCursorTo(target)
   call search('\V'.escape(a:target, '\\').'\$')
 endfunction
 
-" https://stackoverflow.com/a/47051271
 function! s:getVisualSelection()
   if mode()=="v"
-    let [line_start, column_start] = getpos("v")[1:2]
-    let [line_end, column_end] = getpos(".")[1:2]
+    let line_start = getpos("v")[1]
+    let line_end = getpos(".")[1]
   else
-    let [line_start, column_start] = getpos("'<")[1:2]
-    let [line_end, column_end] = getpos("'>")[1:2]
+    let line_start = getpos("'<")[1]
+    let line_end = getpos("'>")[1]
   end
-  if (line2byte(line_start)+column_start) > (line2byte(line_end)+column_end)
-    let [line_start, column_start, line_end, column_end] =
-          \   [line_end, column_end, line_start, column_start]
-  end
+  if line_start > line_end
+      let [line_start, line_end] = [line_end, line_start]
+  endif
   let lines = getline(line_start, line_end)
   if len(lines) == 0
     return ''
   endif
-  let lines[-1] = lines[-1][: column_end - 1]
-  let lines[0] = lines[0][column_start - 1:]
   return lines
 endfunction
 
@@ -120,6 +116,28 @@ function! s:deleteItemUnderCursor() abort
   endif
 
   " Reload the buffer
+  Dirvish %
+endfunction
+
+function! s:deleteSelectedItems() abort
+  let lines = s:getVisualSelection()
+  " Confirm selection
+  echo join(map(copy(lines), 'fnamemodify(v:val, ":t")'), "\n") .. "\n"
+  let check = confirm("Delete the above?", "&Yes\n&No", 2)
+  if check !=1
+      echo "Cancelled."
+      return
+  endif
+
+  " Delete each item
+  for item in lines
+      let output = system(g:DovishDelete(item))
+      if v:shell_error
+          call s:logError(output)
+      endif
+  endfor
+
+  "Reload the buffer
   Dirvish %
 endfunction
 
@@ -284,6 +302,7 @@ endfunction
 " nnoremap <silent><buffer> <Plug>(dovish_create_directory) :<C-U> call <SID>createDirectory()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_rename) :<C-U> call <SID>renameItemUnderCursor()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_delete) :<C-U> call <SID>deleteItemUnderCursor()<CR>
+xnoremap <buffer> <Plug>(dovish_delete_selection) :<C-U> call <SID>deleteSelectedItems()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_yank) :<C-U> call <SID>copyFilePathUnderCursor()<CR>
 xnoremap <silent><buffer> <Plug>(dovish_yank) :<C-U> call <SID>copyVisualSelection()<CR>
 nnoremap <silent><buffer> <Plug>(dovish_copy) :<C-U> call <SID>copyYankedItemToCurrentDirectory()<CR>
@@ -302,6 +321,9 @@ if g:dirvish_dovish_map_keys
   " endif
   if !hasmapto('<Plug>(dovish_delete)', 'n')
     execute 'nmap <silent><buffer> dd <Plug>(dovish_delete)'
+  endif
+  if !hasmapto('<Plug>(dovish_delete_selection)', 'n')
+    execute 'xmap <silent><buffer> dd <Plug>(dovish_delete_selection)'
   endif
   if !hasmapto('<Plug>(dovish_rename)', 'n')
     execute 'nmap <silent><buffer> cw <Plug>(dovish_rename)'
